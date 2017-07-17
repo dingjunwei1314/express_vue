@@ -23,6 +23,11 @@ UserSchema.statics.updata_user_img=function(req,cb){
     return this.model('User').update({name:name},{$set:{user_img:user_img}},cb);
 }
 
+UserSchema.statics.chat_info=function(data,cb){
+    var name=data.user;
+    return this.model('User').findOne({name:name},cb)
+}
+
 
 var UserModel=db.model('User',UserSchema);
 module.exports = UserModel;
