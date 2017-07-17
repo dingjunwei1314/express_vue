@@ -4,7 +4,6 @@ module.exports=function(req,res,next){
     console.log(req.session.user)
 
     if(req.session.user){  
-        console.log('已登录')
         next();  
     }else{  
         res.send({code:-100,message:'未登录'})
