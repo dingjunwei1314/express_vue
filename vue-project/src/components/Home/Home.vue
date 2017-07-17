@@ -1,15 +1,21 @@
 <template>
   <div class="section" style="background:#eee">
-    <h1>这一部分将是聊天室</h1>
+   
+    <cell-box is-link link="/Tab/Chatroom">
+      群聊室
+    </cell-box>
+    
   </div>
 </template>
 
 <script>
-
+import {Group, Cell, CellBox} from 'vux'
 export default {
-  name: 'tab',
+  name: 'home',
   components: {
-   
+    Group, 
+    Cell, 
+    CellBox
   },
   data () {
     return{
@@ -22,14 +28,15 @@ export default {
   methods:{
     getData:function(){
       var that=this;
-      this.$http.post('/').then(function(res){
+      this.$http('post','/')
+      .then(function(res){
         if(res.data.code == -100){
-          console.log(1)
           that.$router.push({ path: '/Login' })        
         }else if(res.data.code==1){
           that.data=res.data;
         }
-      },function(err){
+      })
+      .catch(function(err){
         console.log(err)
       })  
     },
@@ -47,5 +54,5 @@ export default {
 </script>
 
 <style scoped>
-    
+    .weui-cell{background: white}
 </style>

@@ -57,7 +57,8 @@ export default {
                 data={uname:this.username,psd:this.userpsd,act:'register'};
             }
             
-            this.$http.post('/login_register',data).then(function(res){
+            this.$http('post','/login_register',data)
+            .then(function(res){
                 if(res.data.code==1){
                     if(is=='login'){
                         that.$router.push({ path: '/Tab/Home' })
@@ -75,7 +76,8 @@ export default {
                     })
                 }
                 
-            },function(err){
+            })
+            .catch(function(err){
                 console.log(err)
             })
         }

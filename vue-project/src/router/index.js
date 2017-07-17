@@ -1,9 +1,31 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Tab from '@/components/Tab/Tab'
-import Home from '@/components/Home/Home'
-import Person from '@/components/Person/Person'
-import Login from '@/components/Login/Login'
+
+const Home=function(resolve){
+  require.ensure([],function(){
+    resolve(require('@/components/Home/Home'))
+  })
+}
+
+const Person=function(resolve){
+  require.ensure([],function(){
+    resolve(require('@/components/Person/Person'))
+  })
+}
+
+const Login=function(resolve){
+  require.ensure([],function(){
+    resolve(require('@/components/Login/Login'))
+  })
+}
+
+const Chatroom=function(resolve){
+  require.ensure([],function(){
+    resolve(require('@/components/Chatroom/Chatroom'))
+  })
+}
+
 
 Vue.use(Router)
 
@@ -17,13 +39,17 @@ const router=new Router({
           component: Tab,
           children:[
             {
-                path:'/Tab/Home',
-                component:Home
+              path:'/Tab/Home',
+              component:Home
             },
             {
               path:'/Tab/Person',
               component:Person
             },
+            {
+              path:'/Tab/Chatroom',
+              component:Chatroom
+            }
           ]
         },
         {
