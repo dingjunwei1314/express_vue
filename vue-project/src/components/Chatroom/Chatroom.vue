@@ -44,7 +44,7 @@
     </div>
 
     <div class="send_con">
-      <input ref='img_input' style="display:none" type="file" accept="image/png,image/jpeg" @change="update($event)"/>
+      <input ref='img_input' style="display:none" type="file" id="file" accept="image/png,image/jpeg" @change="update($event)"/>
       <x-icon type="images" @click="send_img" style="vertical-align:middle" size="25"></x-icon>
       <input type="text" v-model="msg" name="content"> 
       <x-button mini type="primary" @click.native="send_text">发送</x-button>
@@ -94,6 +94,7 @@ export default {
       this.$refs.img_input.click()
     },
     update(event){
+      console.log(event.target.files)
       var that=this
       var file=event.target.files;
       if (file.length != 0) {
@@ -115,21 +116,25 @@ export default {
       that.socket_io=io.connect('http://localhost:3000');
       that.socket_io.on('login',function(data){
         that.socket_io.emit('login_info',{user:that.username});
+        that.$nextTick(that.scroll_to_bottom)
       });
       that.socket_io.on('login_info',function(data){
         that.history_data.push({type:'sys_in',name:data.user,content:'',img_src:''})
+        that.$nextTick(that.scroll_to_bottom)
       });
       that.socket_io.on('login_out',function(data){
         that.history_data.push({type:'sys_out',name:data,content:'',img_src:''})
+        that.$nextTick(that.scroll_to_bottom)
       });
 
       that.socket_io.on('img',function(data){
-        console.log(data)
+        
         if(data.name==that.username){
           that.history_data.push({type:'me_img',name:data.name,img_content:data.img_content,img_src:data.img_src})
         }else{
           that.history_data.push({type:'others_img',name:data.name,img_content:data.img_content,img_src:data.img_src})
         }
+        that.$nextTick(that.scroll_to_bottom)
       })
 
       that.socket_io.on('newmessage',function(data){
@@ -139,9 +144,13 @@ export default {
         }else{
           that.history_data.push({type:'others',name:data.name,content:data.content,img_src:data.img_src})
         }
+        that.$nextTick(that.scroll_to_bottom)
       });
-
-
+    },
+    watch:{
+      history_data:function(){
+        // $nextTick(scroll_to_bottom)
+      }
     },
     getData:function(){
       var that=this;
@@ -158,6 +167,9 @@ export default {
       .catch(function(err){
         console.log(err)
       })  
+    },
+    scroll_to_bottom(){
+      $(".history_con").scrollTop($(".history_con").height()+$(".history_con").scrollTop()+100)
     }
     
   },
