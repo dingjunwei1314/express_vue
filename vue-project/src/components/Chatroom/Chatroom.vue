@@ -23,17 +23,29 @@
           </div>
       </div>
 
-      <div class="list_con" v-else-if="item.type=='others'">
+      <div class="list_con me" v-else-if="item.type=='me_img'">
          <img class="header"   :src="item.img_src">
           <div class="con">
-            {{item.content}}
+            <img @click="show(item.img_content)" style="max-width:100px;" :src="item.img_content">
+          </div>
+      </div>
+
+      <div class="list_con" v-else-if="item.type=='others_img'">
+         <img class="header"   :src="item.img_src">
+          <div class="con">
+            <img @click="show(item.img_content)" style="max-width:100px;" :src="item.img_content">
           </div>
       </div>
 
     </div>
 
+    <div v-transfer-dom>
+      <previewer :list="img_list" ref="previewer"></previewer>
+    </div>
+
     <div class="send_con">
-      <x-icon type="images" style="vertical-align:middle" size="25"></x-icon>
+      <input ref='img_input' style="display:none" type="file" accept="image/png,image/jpeg" @change="update($event)"/>
+      <x-icon type="images" @click="send_img" style="vertical-align:middle" size="25"></x-icon>
       <input type="text" v-model="msg" name="content"> 
       <x-button mini type="primary" @click.native="send_text">发送</x-button>
     </div>
@@ -41,13 +53,17 @@
 </template>
 
 <script>
-import io from 'socket.io-client'
-import {XButton} from 'vux'
+import io from 'socket.io-client' 
+import {XButton,Previewer, TransferDom } from 'vux'
 export default {
   name: 'home',
+  directives: {
+    TransferDom
+  },
   components: {
     XButton,
-    io
+    io,
+    Previewer 
   },
   data () {
     return{
@@ -55,19 +71,44 @@ export default {
       history_data:[],
       username:'',
       msg:'',
-      user_img:''
+      user_img:'',
+      img_list:[{src:''}]
     }
   },
   created(){
     
   },
   methods:{
+    show(src){
+      this.img_list[0].src=src;
+      this.$refs.previewer.show(0)
+    },
     send_text(){
       if(this.msg==''){
         return false;
       }
       this.socket_io.emit('newmessage',{user:this.username,msg:this.msg});
       this.msg='';
+    },
+    send_img(){
+      this.$refs.img_input.click()
+    },
+    update(event){
+      var that=this
+      var file=event.target.files;
+      if (file.length != 0) {
+          
+          var reader = new FileReader();
+          if (!reader) {
+              console.log('不支持fileReader')
+          }
+          reader.readAsDataURL(file[0]);
+          reader.onload = function(e) {
+              //读取成功，显示到页面并发送到服务器
+              that.socket_io.emit('img',{user:that.username,img:e.target.result})
+          };
+          
+      }
     },
     socket_connect(){
       var that=this;
@@ -82,6 +123,15 @@ export default {
         that.history_data.push({type:'sys_out',name:data,content:'',img_src:''})
       });
 
+      that.socket_io.on('img',function(data){
+        console.log(data)
+        if(data.name==that.username){
+          that.history_data.push({type:'me_img',name:data.name,img_content:data.img_content,img_src:data.img_src})
+        }else{
+          that.history_data.push({type:'others_img',name:data.name,img_content:data.img_content,img_src:data.img_src})
+        }
+      })
+
       that.socket_io.on('newmessage',function(data){
         console.log(data)
         if(data.name==that.username){
@@ -89,8 +139,6 @@ export default {
         }else{
           that.history_data.push({type:'others',name:data.name,content:data.content,img_src:data.img_src})
         }
-        
-        
       });
 
 

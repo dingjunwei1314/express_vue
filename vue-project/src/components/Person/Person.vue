@@ -30,7 +30,21 @@ export default {
     },
     methods: {
         updata_user_img(){
-            this.$refs.update_user_img_input.click()
+            this.$refs.update_user_img_input.click();
+            if (this.files.length != 0) {
+                //获取文件并用FileReader进行读取
+                var file = this.files[0],
+                    reader = new FileReader();
+    
+                if (!reader) {
+                    console.log('不支持fileReader')
+                }
+                reader.onload = function(e) {
+                    //读取成功，显示到页面并发送到服务器
+                    socket.emit('img',{user:user_name,img:e.target.result})
+                };
+                reader.readAsDataURL(file);
+            }
         },
         getData:function(){
           var that=this;
