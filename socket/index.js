@@ -18,8 +18,6 @@ const my_socket=function(){
                     console.log(err)
                 }else{
                     var doc=doc.toObject();
-                    console.log(doc.name)
-                    console.log(doc.user_img)
                     io.sockets.emit("newmessage",{name:doc.name,img_src:'http://localhost:3000/'+doc.user_img.slice(8),content:data.msg})
                 }
                 
@@ -27,10 +25,17 @@ const my_socket=function(){
             
         })
 
-        socket.on('img', function(data) {
-            console.log(data)
-            io.sockets.emit("img",data);
-            // socket.broadcast.emit('img',data);
+        socket.on('img', function(data){
+            console.log(data.user)
+            UserModel.chat_info(data,function(err,doc){
+                if(err){
+                    console.log(err)
+                }else{
+                    var doc=doc.toObject();
+                    io.sockets.emit("img",{name:doc.name,img_src:'http://localhost:3000/'+doc.user_img.slice(8),img_content:data.img})
+                }
+                
+            })
         })
 
         socket.on('disconnect', function () {
